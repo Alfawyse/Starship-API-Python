@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 from app.services.swapi_service import fetch_starships, fetch_starship_by_name , fetch_all_pilots_with_starships , fetch_pilot_by_name
 from app.models.schemas import StarshipUpdate
+import httpx
+from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -22,14 +25,22 @@ async def list_pilots():
     except httpx.HTTPStatusError as e:
         return {"error": f"Failed to fetch pilots. {e}"}
 
+
+
 @router.get("/pilots/details/{pilot_name}")
 async def get_pilot_details(pilot_name: str):
     try:
         pilot_details = await fetch_pilot_by_name(pilot_name)
+        if "error" in pilot_details:
+            # Devuelve un error en formato JSON con un código de estado 404
+            return JSONResponse(content={"error": pilot_details["error"]}, status_code=404)
         return pilot_details
-    except httpx.HTTPStatusError as e:
-        return {"error": f"Failed to fetch pilot. {e}"}
-
+    except httpx.HTTPStatusError:
+        # Maneja errores de conexión a SWAPI
+        return JSONResponse(content={"error": "Failed to connect to SWAPI."}, status_code=500)
+    except Exception:
+        # Maneja errores inesperados
+        return JSONResponse(content={"error": "An unexpected error occurred."}, status_code=500)
 
 # Simulamos una base de datos en memoria
 starships_db = {
