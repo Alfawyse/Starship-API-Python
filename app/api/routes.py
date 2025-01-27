@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.services.swapi_service import fetch_starships, fetch_starship_by_name , fetch_all_pilots_with_starships , fetch_pilot_by_name
+from app.models.schemas import StarshipUpdate
 
 router = APIRouter()
 
@@ -30,6 +31,7 @@ async def get_pilot_details(pilot_name: str):
         return {"error": f"Failed to fetch pilot. {e}"}
 
 
+# Simulamos una base de datos en memoria
 starships_db = {
     "Millennium Falcon": {
         "name": "Millennium Falcon",
@@ -41,6 +43,7 @@ starships_db = {
         "pilots": ["Han Solo", "Chewbacca"],
     }
 }
+
 
 @router.put("/starships/update")
 async def update_starship(starship: StarshipUpdate):
