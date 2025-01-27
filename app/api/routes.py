@@ -14,8 +14,10 @@ async def get_starships():
 
 @router.get("/starships/details/{starship_name}")
 async def get_starship_details(starship_name: str):
-    starship_details = await fetch_starship_by_name(starship_name)
-    return starship_details
+    starship = await fetch_starship_by_name(starship_name)
+    if "error" in starship:
+        raise HTTPException(status_code=404, detail=starship["error"])
+    return starship
 
 @router.get("/pilots")
 async def list_pilots():

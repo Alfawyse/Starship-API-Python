@@ -1,5 +1,5 @@
 import httpx
-
+from fastapi import HTTPException
 
 BASE_URL = "https://swapi.py4e.com/api"
 
@@ -8,9 +8,9 @@ async def fetch_starships():
         try:
             response = await client.get(f"{BASE_URL}/starships/")
             response.raise_for_status()
-            data = response.json()
-        except httpx.HTTPStatusError:
-            return {"error": "Failed to fetch starships."}
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=response.status_code, detail="Error fetching starships from SWAPI")
+        data = response.json()
 
     starships = [
         {
