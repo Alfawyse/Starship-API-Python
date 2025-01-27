@@ -30,6 +30,38 @@ async def get_pilot_details(pilot_name: str):
         return {"error": f"Failed to fetch pilot. {e}"}
 
 
+starships_db = {
+    "Millennium Falcon": {
+        "name": "Millennium Falcon",
+        "model": "YT-1300 light freighter",
+        "cost_in_credits": 100000,
+        "max_atmosphering_speed": 1050,
+        "crew_capacity": 4,
+        "passenger_capacity": 6,
+        "pilots": ["Han Solo", "Chewbacca"],
+    }
+}
 
+@router.put("/starships/update")
+async def update_starship(starship: StarshipUpdate):
+    # Verifica si la nave ya existe en la "base de datos"
+    if starship.name not in starships_db:
+        raise HTTPException(status_code=404, detail="Starship not found")
+
+    # Actualiza los datos de la nave
+    starships_db[starship.name] = {
+        "name": starship.name,
+        "model": starship.model,
+        "cost_in_credits": starship.cost_in_credits,
+        "max_atmosphering_speed": starship.max_atmosphering_speed,
+        "crew_capacity": starship.crew_capacity,
+        "passenger_capacity": starship.passenger_capacity,
+        "pilots": starship.pilots,
+    }
+
+    return {
+        "message": "Starship updated successfully",
+        "data": starships_db[starship.name],
+    }
 
 
