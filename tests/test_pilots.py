@@ -1,11 +1,11 @@
-import pytest
 import respx
 from fastapi.testclient import TestClient
-from app.main import app
 from httpx import Response
-import httpx
+
+from app.main import app
 
 client = TestClient(app)
+
 
 # Prueba para listar pilotos con starships
 @respx.mock
@@ -24,7 +24,7 @@ def test_list_pilots():
                         "birth_year": "19BBY",
                         "species": ["https://swapi.py4e.com/api/species/1/"],
                         "homeworld": "https://swapi.py4e.com/api/planets/1/",
-                        "starships": ["https://swapi.py4e.com/api/starships/12/"]
+                        "starships": ["https://swapi.py4e.com/api/starships/12/"],
                     },
                     {
                         "name": "Han Solo",
@@ -34,8 +34,8 @@ def test_list_pilots():
                         "birth_year": "29BBY",
                         "species": ["https://swapi.py4e.com/api/species/1/"],
                         "homeworld": "https://swapi.py4e.com/api/planets/2/",
-                        "starships": ["https://swapi.py4e.com/api/starships/10/"]
-                    }
+                        "starships": ["https://swapi.py4e.com/api/starships/10/"],
+                    },
                 ],
                 "next": None,
             },
@@ -56,7 +56,9 @@ def test_list_pilots():
         return_value=Response(200, json={"name": "X-wing", "model": "T-65 X-wing"})
     )
     respx.get("https://swapi.py4e.com/api/starships/10/").mock(
-        return_value=Response(200, json={"name": "Millennium Falcon", "model": "YT-1300 light freighter"})
+        return_value=Response(
+            200, json={"name": "Millennium Falcon", "model": "YT-1300 light freighter"}
+        )
     )
 
     response = client.get("/pilots")
@@ -84,7 +86,7 @@ def test_pilot_details_with_starships():
                         "birth_year": "19BBY",
                         "species": ["https://swapi.py4e.com/api/species/1/"],
                         "homeworld": "https://swapi.py4e.com/api/planets/1/",
-                        "starships": ["https://swapi.py4e.com/api/starships/12/"]
+                        "starships": ["https://swapi.py4e.com/api/starships/12/"],
                     }
                 ]
             },
@@ -101,7 +103,6 @@ def test_pilot_details_with_starships():
         return_value=Response(200, json={"name": "X-wing", "model": "T-65 X-wing"})
     )
 
-
     response = client.get("/pilots/details/Luke Skywalker")
     assert response.status_code == 200
     data = response.json()
@@ -111,6 +112,7 @@ def test_pilot_details_with_starships():
     assert "starships" in data
     assert len(data["starships"]) == 1
     assert data["starships"][0]["name"] == "X-wing"
+
 
 # Prueba para detalles de un piloto sin starships
 @respx.mock
@@ -129,7 +131,7 @@ def test_pilot_details_without_starships():
                         "birth_year": "112BBY",
                         "species": ["https://swapi.py4e.com/api/species/2/"],
                         "homeworld": "https://swapi.py4e.com/api/planets/1/",
-                        "starships": []  # Sin starships
+                        "starships": [],  # Sin starships
                     }
                 ]
             },
@@ -141,7 +143,6 @@ def test_pilot_details_without_starships():
     data = response.json()
     assert "error" in data
     assert data["error"] == "Pilot not found or has no starships."
-
 
 
 # Prueba para piloto inexistente
@@ -172,5 +173,3 @@ def test_pilot_details_swapi_error():
     data = response.json()
     assert "error" in data
     assert data["error"] == "Failed to connect to SWAPI."
-
-

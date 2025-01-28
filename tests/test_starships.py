@@ -1,10 +1,11 @@
-import pytest
 import respx
 from fastapi.testclient import TestClient
-from app.main import app
 from httpx import Response
 
+from app.main import app
+
 client = TestClient(app)
+
 
 # Test para listar starships
 @respx.mock
@@ -85,13 +86,10 @@ def test_starship_not_found():
     assert data["detail"] == "Starship not found"
 
 
-
 # Test para fallo en SWAPI
 @respx.mock
 def test_starship_service_error():
-    respx.get("https://swapi.py4e.com/api/starships/").mock(
-        return_value=Response(500)
-    )
+    respx.get("https://swapi.py4e.com/api/starships/").mock(return_value=Response(500))
 
     response = client.get("/starships")
     assert response.status_code == 500

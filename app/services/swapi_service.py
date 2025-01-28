@@ -37,12 +37,16 @@ async def enrich_pilot_data(person: dict, client: httpx.AsyncClient) -> dict:
             response = await client.get(starship_url)
             response.raise_for_status()
             starship_data = response.json()
-            starships.append({
-                "name": starship_data.get("name"),
-                "model": starship_data.get("model"),
-            })
+            starships.append(
+                {
+                    "name": starship_data.get("name"),
+                    "model": starship_data.get("model"),
+                }
+            )
     except httpx.HTTPStatusError:
-        raise HTTPException(status_code=500, detail="Failed to fetch additional pilot data.")
+        raise HTTPException(
+            status_code=500, detail="Failed to fetch additional pilot data."
+        )
 
     return {
         "name": person.get("name"),
@@ -61,14 +65,19 @@ async def fetch_starships():
     Fetch a list of starships from the SWAPI.
 
     Returns:
-        dict: A dictionary containing starship details and the next page URL if applicable.
+        dict: A dictionary containing starship details
+        and the next page URL if applicable.
     """
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(f"{BASE_URL}/starships/")
             response.raise_for_status()
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=response.status_code, detail="Error fetching starships from SWAPI")
+        except httpx.HTTPStatusError:
+            raise HTTPException(
+                status_code=500,
+                detail="Error fetching starships from SWAPI",
+            )
+
         data = response.json()
 
     starships = [
@@ -169,5 +178,3 @@ async def fetch_pilot_by_name(pilot_name: str):
                 return await enrich_pilot_data(person, client)
 
         return {"error": "Pilot not found or has no starships."}
-
-
