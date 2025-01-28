@@ -117,7 +117,6 @@ def test_pilot_details_with_starships():
 # Prueba para detalles de un piloto sin starships
 @respx.mock
 def test_pilot_details_without_starships():
-    # Simula respuesta de SWAPI para un piloto sin starships
     respx.get("https://swapi.py4e.com/api/people/?search=C3PO").mock(
         return_value=Response(
             200,
@@ -131,7 +130,7 @@ def test_pilot_details_without_starships():
                         "birth_year": "112BBY",
                         "species": ["https://swapi.py4e.com/api/species/2/"],
                         "homeworld": "https://swapi.py4e.com/api/planets/1/",
-                        "starships": [],  # Sin starships
+                        "starships": [],
                     }
                 ]
             },
@@ -141,35 +140,31 @@ def test_pilot_details_without_starships():
     response = client.get("/pilots/details/C3PO")
     assert response.status_code == 404
     data = response.json()
-    assert "error" in data
-    assert data["error"] == "Pilot not found or has no starships."
+    assert "error" in data or "detail" in data
+    assert data["detail"] == "Pilot not found or has no starships."
 
 
-# Prueba para piloto inexistente
 @respx.mock
 def test_pilot_details_not_found():
-    # Simula respuesta de SWAPI para un piloto que no existe
     respx.get("https://swapi.py4e.com/api/people/?search=Nonexistent").mock(
-        return_value=Response(200, json={"results": []})  # Sin resultados
+        return_value=Response(200, json={"results": []})
     )
 
     response = client.get("/pilots/details/Nonexistent")
     assert response.status_code == 404
     data = response.json()
-    assert "error" in data
-    assert data["error"] == "Pilot not found or has no starships."
+    assert "error" in data or "detail" in data
+    assert data["detail"] == "Pilot not found or has no starships."
 
 
-# Prueba para fallo de conexión a SWAPI
 @respx.mock
 def test_pilot_details_swapi_error():
-    # Simula un fallo de conexión o error de SWAPI
     respx.get("https://swapi.py4e.com/api/people/?search=Luke%20Skywalker").mock(
         return_value=Response(500)
     )
 
-    response = client.get("/pilots/details/Luke%20Skywalker")
-    assert response.status_code == 500  # Verifica que el código de estado es 500
+    response = client.get("/pilots/details/Luke Skywalker")
+    assert response.status_code == 500
     data = response.json()
-    assert "error" in data
-    assert data["error"] == "Failed to connect to SWAPI."
+    assert "error" in data or "detail" in data
+    assert data["detail"] == "Failed to fetch pilot details from SWAPI."

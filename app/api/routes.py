@@ -83,21 +83,14 @@ async def get_pilot_details(pilot_name: str):
     try:
         pilot_details = await fetch_pilot_by_name(pilot_name)
         if "error" in pilot_details:
-            raise HTTPException(
-                status_code=404,
-                detail=pilot_details["error"],
-            )
+            raise HTTPException(status_code=404, detail=pilot_details["error"])
         return pilot_details
+    except HTTPException as e:
+        raise e
     except httpx.HTTPStatusError:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to connect to SWAPI.",
-        )
+        raise HTTPException(status_code=500, detail="Failed to connect to SWAPI.")
     except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="An unexpected error occurred.",
-        )
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 # Simulated in-memory database for starships
