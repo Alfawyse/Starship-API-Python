@@ -7,9 +7,11 @@ from app.main import app
 client = TestClient(app)
 
 
-# Test para listar starships
 @respx.mock
 def test_list_starships():
+    """
+    Test retrieving a list of starships from the API.
+    """
     respx.get("https://swapi.py4e.com/api/starships/").mock(
         return_value=Response(
             200,
@@ -41,9 +43,11 @@ def test_list_starships():
     assert data["starships"][1]["name"] == "Millennium Falcon"
 
 
-# Test para buscar una starship por nombre
 @respx.mock
 def test_search_starship_by_name():
+    """
+    Test searching for a specific starship by name.
+    """
     respx.get("https://swapi.py4e.com/api/starships/?search=X-wing").mock(
         return_value=Response(
             200,
@@ -72,9 +76,11 @@ def test_search_starship_by_name():
     assert data["max_atmosphering_speed"] == "1050"
 
 
-# Test para starship inexistente
 @respx.mock
 def test_starship_not_found():
+    """
+    Test retrieving a non-existent starship.
+    """
     respx.get("https://swapi.py4e.com/api/starships/?search=Nonexistent").mock(
         return_value=Response(200, json={"results": []})
     )
@@ -86,9 +92,11 @@ def test_starship_not_found():
     assert data["detail"] == "Starship not found"
 
 
-# Test para fallo en SWAPI
 @respx.mock
 def test_starship_service_error():
+    """
+    Test handling a SWAPI connection error for starships.
+    """
     respx.get("https://swapi.py4e.com/api/starships/").mock(return_value=Response(500))
 
     response = client.get("/starships")
@@ -98,10 +106,12 @@ def test_starship_service_error():
     assert data["detail"] == "Error fetching starships from SWAPI"
 
 
-# Test para actualizar una starship
 @respx.mock
 def test_update_starship():
-    # Datos de entrada para actualizar la nave
+    """
+    Test updating a starship in the local database.
+    """
+    # Input data for the starship update
     updated_data = {
         "name": "Millennium Falcon",
         "model": "YT-1300 Updated",
@@ -112,10 +122,10 @@ def test_update_starship():
         "pilots": ["Han Solo", "Chewbacca"],
     }
 
-    # Realiza la solicitud de actualización
+    # Send the update request
     response = client.put("/starships/update", json=updated_data)
 
-    # Aserciones
+    # Assertions
     assert response.status_code == 200
     data = response.json()
     assert data["message"] == "Starship updated successfully"
